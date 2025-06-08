@@ -1,39 +1,28 @@
-# Use an official OpenJDK runtime as a parent image
+# 1. OpenJDK 17 기반 이미지 (AMD64 아키텍처 보장)
 FROM --platform=linux/amd64 openjdk:17-jdk-slim
 
-# 필수 시스템 패키지 설치 (Python + Chrome + 기타 의존성)
+# 2. Python3, pip 설치 (전역 설치)
 RUN apt-get update && apt-get install -y \
-    python3 python3-pip python3-venv \
-    wget unzip curl gnupg \
-    fonts-liberation libappindicator3-1 libasound2 libatk-bridge2.0-0 \
-    libatk1.0-0 libcups2 libdbus-1-3 libgdk-pixbuf2.0-0 \
-    libnspr4 libnss3 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 \
-    libgbm1 libgtk-3-0 libxshmfence1 xdg-utils && \
-    rm -rf /var/lib/apt/lists/*
+    python3 python3-pip \
+    && rm -rf /var/lib/apt/lists/*
 
-# Chrome 설치
-RUN curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-linux.gpg && \
-    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-linux.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
-    apt-get update && apt-get install -y google-chrome-stable && \
-    rm -rf /var/lib/apt/lists/*
-
-# 작업 디렉토리 설정
+# 3. 작업 디렉토리 지정
 WORKDIR /app
 
-# requirements.txt 복사 및 Python 패키지 설치
-# Spring Boot JAR 파일 복사
+# 4. 애플리케이션 관련 파일 복사
+# - Spring Boot JAR
+# - Python 파일 디렉토리
+# - Python 패키지 목록
 COPY build/libs/DeepLung-0.0.1-SNAPSHOT.jar .
 COPY requirements.txt .
 COPY python/ ./python/
 
-# 가상환경 생성 및 패키지 설치
-RUN python3 -m venv venv && \
-    . venv/bin/activate && \
-    pip install --upgrade pip && \
-    pip install -r requirements.txt
+# 5. 전역 pip로 Python 패키지 설치
+RUN pip3 install --upgrade pip && \
+    pip3 install -r requirements.txt
 
-# 포트 오픈
+# 6. 서버 포트 오픈
 EXPOSE 8080
 
-# JAR 실행
+# 7. Spring Boot JAR 실행
 ENTRYPOINT ["java", "-jar", "DeepLung-0.0.1-SNAPSHOT.jar"]
