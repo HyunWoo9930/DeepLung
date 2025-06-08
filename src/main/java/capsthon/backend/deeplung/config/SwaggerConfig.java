@@ -25,8 +25,12 @@ public class SwaggerConfig {
 				.name("HyunWoo9930")
 				.email("hw62459930@gmail.com"));
 
+		Server server1 = new Server().url("https://mini1team.lion.it.kr");
+		Server server2 = new Server().url("http://localhost:8080");
+
 		return new OpenAPI()
 			.info(info)
+			.servers(List.of(server1, server2))
 			.addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
 			.components(new io.swagger.v3.oas.models.Components()
 				.addSecuritySchemes("Bearer Authentication", new SecurityScheme()
