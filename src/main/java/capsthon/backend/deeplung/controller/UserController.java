@@ -1,7 +1,10 @@
 package capsthon.backend.deeplung.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +37,16 @@ public class UserController {
 			.status(200)
 			.message("로그인 성공")
 			.data(userService.login(loginRequest))
+			.build();
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/info")
+	public ResponseEntity<?> info(@AuthenticationPrincipal UserDetails userDetails) {
+		ApiResponse<?> response = ApiResponse.builder()
+			.status(200)
+			.message("로그인 성공")
+			.data(userService.info(userDetails))
 			.build();
 		return ResponseEntity.ok(response);
 	}
