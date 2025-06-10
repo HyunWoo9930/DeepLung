@@ -304,6 +304,7 @@ public class PaperweightService {
 			.swallowingDifficulty(paperweight.getSwallowingDifficulty())
 			.weightLoss(paperweight.getWeightLoss())
 			.wheezing(paperweight.getWheezing())
+			.riskLevel(paperweight.getRiskLevel())
 			.shortnessOfBreath(paperweight.getShortnessOfBreath())
 			.build();
 	}
