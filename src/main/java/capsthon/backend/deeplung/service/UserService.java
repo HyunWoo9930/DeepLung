@@ -24,15 +24,19 @@ public class UserService {
 	private final JwtTokenProvider jwtTokenProvider;
 
 	public void createUser(JoinRequest joinRequest) {
-		User newUser = User.builder()
-			.userId(joinRequest.getUserId())
-			.password(passwordEncoder.encode(joinRequest.getPassword()))
-			.name(joinRequest.getName())
-			.gender(joinRequest.getGender())
-			.isPrivateInformAgreed(joinRequest.getIsPrivateInformAgreed())
-			.birthYear(joinRequest.getBirthYear())
-			.build();
-		userRepository.save(newUser);
+		if (userRepository.findByUserId(joinRequest.getUserId()) == null) {
+			User newUser = User.builder()
+				.userId(joinRequest.getUserId())
+				.password(passwordEncoder.encode(joinRequest.getPassword()))
+				.name(joinRequest.getName())
+				.gender(joinRequest.getGender())
+				.isPrivateInformAgreed(joinRequest.getIsPrivateInformAgreed())
+				.birthYear(joinRequest.getBirthYear())
+				.build();
+			userRepository.save(newUser);
+		} else {
+			throw new RuntimeException("이미 존재하는 회원입니다!");
+		}
 	}
 
 	public JwtAuthenticationResponse login(LoginRequest loginRequest) {
