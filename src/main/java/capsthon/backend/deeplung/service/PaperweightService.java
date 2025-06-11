@@ -308,4 +308,29 @@ public class PaperweightService {
 			.shortnessOfBreath(paperweight.getShortnessOfBreath())
 			.build();
 	}
+
+	public long countPaperweights(UserDetails userDetails) {
+		User user = userRepository.findByUserId(userDetails.getUsername());
+		return paperweightRepository.countByUser(user);
+	}
+
+	public byte[] getXrayImage(UserDetails userDetails, Long paperweightId) throws IOException {
+		User user = userRepository.findByUserId(userDetails.getUsername());
+		Paperweight paperweight = paperweightRepository.findByIdAndUser(paperweightId, user);
+
+		if (paperweight == null) {
+			throw new IllegalArgumentException("해당 ID의 문진 기록을 찾을 수 없습니다.");
+		}
+
+		if (paperweight.getImageUrl() == null || paperweight.getImageUrl().isEmpty()) {
+			throw new IllegalStateException("해당 문진 기록에 X-ray 이미지가 없습니다.");
+		}
+
+		File imageFile = new File(paperweight.getImageUrl());
+		if (!imageFile.exists() || !imageFile.isFile()) {
+			throw new IOException("X-ray 이미지 파일을 찾을 수 없습니다.");
+		}
+
+		return Files.readAllBytes(imageFile.toPath());
+	}
 }

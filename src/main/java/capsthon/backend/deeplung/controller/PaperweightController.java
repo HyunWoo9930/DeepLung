@@ -3,9 +3,13 @@ package capsthon.backend.deeplung.controller;
 import java.io.IOException;
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -81,5 +85,40 @@ public class PaperweightController {
 			.message("조회를 완료하였습니다!!")
 			.build();
 		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/count")
+	public ResponseEntity<?> countPaperweights() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		long count = paperweightService.countPaperweights(userDetails);
+		ApiResponse<?> response = ApiResponse.builder()
+			.status(200)
+			.data(count)
+			.message("문진 개수 조회를 완료하였습니다!!")
+			.build();
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/{paperweight_id}/xray")
+	public ResponseEntity<byte[]> getXrayImage(@PathVariable Long paperweight_id) {
+		try {
+			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+			byte[] imageBytes = paperweightService.getXrayImage(userDetails, paperweight_id);
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.IMAGE_PNG);
+			headers.setContentLength(imageBytes.length);
+
+			return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
+		} catch (IllegalArgumentException e) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (IllegalStateException e) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} catch (IOException e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 }

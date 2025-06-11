@@ -12,4 +12,6 @@ public interface PaperweightRepository extends JpaRepository<Paperweight, Long> 
 	List<Paperweight> findAllByUserOrderByCreatedAtDesc(User user);
 
 	Paperweight findByIdAndUser(Long id, User user);
+
+	long countByUser(User user);
 }
