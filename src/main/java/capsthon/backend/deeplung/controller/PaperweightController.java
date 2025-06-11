@@ -26,15 +26,28 @@ import capsthon.backend.deeplung.domain.dto.response.ApiResponse;
 import capsthon.backend.deeplung.domain.dto.response.PaperweightDetailResponse;
 import capsthon.backend.deeplung.domain.dto.response.PaperweightResponse;
 import capsthon.backend.deeplung.service.PaperweightService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("api/v1/paperweight")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@Tag(name = "문진표 API", description = "폐 건강 문진표 관련 API 엔드포인트")
 public class PaperweightController {
 	private final PaperweightService paperweightService;
 
+	@Operation(summary = "일반 폐 건강 예측", description = "사용자의 문진표 정보를 기반으로 폐 건강 상태를 예측합니다.")
+	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "예측 성공", 
+		content = @Content(schema = @Schema(implementation = ApiResponse.class)))
+	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "예측 실패", 
+		content = @Content(schema = @Schema(implementation = ApiResponse.class)))
+	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 오류", 
+		content = @Content(schema = @Schema(implementation = ApiResponse.class)))
 	@PostMapping("/normal")
 	public ResponseEntity<?> normal(@AuthenticationPrincipal UserDetails userDetails,
 		@RequestBody PaperweightRequest paperweightRequest) throws IOException {
@@ -47,6 +60,13 @@ public class PaperweightController {
 		return ResponseEntity.ok(response);
 	}
 
+	@Operation(summary = "전문가용 폐 건강 예측", description = "사용자의 문진표 정보와 X-ray 이미지를 기반으로 폐 건강 상태를 예측합니다.")
+	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "예측 성공", 
+		content = @Content(schema = @Schema(implementation = ApiResponse.class)))
+	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "예측 실패", 
+		content = @Content(schema = @Schema(implementation = ApiResponse.class)))
+	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 오류", 
+		content = @Content(schema = @Schema(implementation = ApiResponse.class)))
 	@PostMapping(value = "/professional",
 		consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
 	public ResponseEntity<?> professional(
@@ -63,6 +83,11 @@ public class PaperweightController {
 		return ResponseEntity.ok(response);
 	}
 
+	@Operation(summary = "문진표 목록 조회", description = "사용자의 모든 문진표 목록을 조회합니다.")
+	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공", 
+		content = @Content(schema = @Schema(implementation = ApiResponse.class)))
+	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증되지 않은 사용자", 
+		content = @Content(schema = @Schema(implementation = ApiResponse.class)))
 	@GetMapping("/")
 	public ResponseEntity<?> getPaperweights(@AuthenticationPrincipal UserDetails userDetails) {
 		List<PaperweightResponse> paperweights = paperweightService.getPaperweights(userDetails);
@@ -74,6 +99,13 @@ public class PaperweightController {
 		return ResponseEntity.ok(response);
 	}
 
+	@Operation(summary = "문진표 상세 조회", description = "특정 문진표의 상세 정보를 조회합니다.")
+	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공", 
+		content = @Content(schema = @Schema(implementation = ApiResponse.class)))
+	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증되지 않은 사용자", 
+		content = @Content(schema = @Schema(implementation = ApiResponse.class)))
+	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "문진표를 찾을 수 없음", 
+		content = @Content(schema = @Schema(implementation = ApiResponse.class)))
 	@GetMapping("/{paperweight_id}")
 	public ResponseEntity<?> getPaperweightDetail(@AuthenticationPrincipal UserDetails userDetails,
 		@PathVariable Long paperweight_id) {
@@ -87,6 +119,11 @@ public class PaperweightController {
 		return ResponseEntity.ok(response);
 	}
 
+	@Operation(summary = "문진표 개수 조회", description = "사용자의 문진표 개수를 조회합니다.")
+	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공", 
+		content = @Content(schema = @Schema(implementation = ApiResponse.class)))
+	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증되지 않은 사용자", 
+		content = @Content(schema = @Schema(implementation = ApiResponse.class)))
 	@GetMapping("/count")
 	public ResponseEntity<?> countPaperweights() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -100,6 +137,13 @@ public class PaperweightController {
 		return ResponseEntity.ok(response);
 	}
 
+	@Operation(summary = "X-ray 이미지 조회", description = "특정 문진표에 연결된 X-ray 이미지를 조회합니다.")
+	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "이미지 조회 성공", 
+		content = @Content(mediaType = "image/png"))
+	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
+	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "이미지를 찾을 수 없음")
+	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "이미지가 없음")
+	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 오류")
 	@GetMapping("/{paperweight_id}/xray")
 	public ResponseEntity<byte[]> getXrayImage(@PathVariable Long paperweight_id) {
 		try {

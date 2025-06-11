@@ -104,7 +104,7 @@ public class PaperweightService {
 				.riskLevel(prediction.equals("Low") ? RiskLevel.LOW :
 					(prediction.equals("High") ? RiskLevel.HIGH : RiskLevel.MEDIUM))
 				.user(user)
-				.paperweightType(PaperweightType.PROFESSIONAL)
+				.paperweightType(PaperweightType.NORMAL)
 				.age(paperweightRequest.getAge())
 				.gender(paperweightRequest.getGender())
 				.airPollution(paperweightRequest.getAirPollution())

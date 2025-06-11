@@ -2,6 +2,7 @@ package capsthon.backend.deeplung.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -75,5 +76,21 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.message").value("회원가입 성공"));
+    }
+
+    @Test
+    @WithMockUser
+    void joinShouldReturnErrorWhenDuplicateUserId() throws Exception {
+        // Given
+        String errorMessage = "이미 존재하는 회원입니다!";
+        doThrow(new RuntimeException(errorMessage)).when(userService).createUser(any(JoinRequest.class));
+
+        // When & Then
+        mockMvc.perform(post("/api/v1/user/join")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(joinRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value(errorMessage));
     }
 }
